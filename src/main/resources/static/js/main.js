@@ -52,16 +52,25 @@ Vue.component('message-form',
 
 )
 Vue.component('message-row', {
-    props:['message','editMessage'],
+    props:['message','editMessage','messages'],
     template: '<div>' +
         '<i>({{ message.id }})</i>{{message.text}}' +
-        '<span >' +
+        '<span style="position: absolute; right: 0" >' +
         '<input type="button" value="Edit" @click="edit"/>' +
+        '<input type="button" value="X" @click="del"/>' +
         '</span>' +
         '</div>',
     methods: {
         edit: function (){
+
             this.editMessage(this.message);
+        },
+        del: function (){
+            messageApi.remove({id: this.message.id}).then(result=>{
+                if (result.ok){
+                    this.messages.splice(this.messages.indexOf(this.message),1)
+                }
+            })
         }
     }
 });
@@ -76,7 +85,7 @@ Vue.component('messages-list', {
     template: '<div style="position: relative; width: 300px"> ' +
         '<message-form :messages="messages" :messageAttr="message"/>' +
         '<message-row  v-for="message in messages" :key="message.id" :message="message"' +
-        ' :editMessage="editMessage"/></div>',
+        ' :editMessage="editMessage" :messages="messages"/></div>',
     created: function(){
         messageApi.get().then(result=>
             result.json().then(data=>
